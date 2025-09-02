@@ -11,10 +11,20 @@ Gemini API の画像生成に関するガイドラインをライブ取得して
 
 ## セットアップ
 
-- 前提: Node.js 18 以上
+- 前提: Node.js 18 以上（このサーバーは Node.js 18+ で動作確認済み。`package.json` の `engines` に `>=18.17` を指定済み）
 - 依存関係のインストール: `npm i`
 - ビルド: `npm run build`
 - 実行 (stdio): `npm start`
+
+インストール手順（クローンから起動まで）
+
+```
+git clone https://github.com/Takamasa045/nanobanana-rules.git
+cd nanobanana-rules
+npm install
+npm run build
+npm start
+```
 
 ## Claude Code 連携
 
@@ -33,7 +43,24 @@ get_rules { "lang": "ja", "model": "gemini-2.5-flash-image-preview" }
 ## 免責
 
 - 取得元は ai.google.dev。各種規約・robots.txt を遵守します。
-- 永続キャッシュは行いません（短時間のメモリキャッシュのみ）。
+- 永続キャッシュは行いません（短時間のメモリキャッシュのみ・既定TTL約90秒）。
+- 注意: **本プロジェクトは Google 非公式の補助ツールです。取得するコンテンツは Google に帰属します。利用者は [Google Generative AI 利用規約](https://policies.google.com/terms/generative-ai?hl=ja) を必ず順守してください。**
+
+## サンプルレスポンス（短縮）
+
+```
+{
+  "version": "2025-09-02",
+  "references": {
+    "image_generation_doc": "https://ai.google.dev/gemini-api/docs/image-generation?hl=ja"
+  },
+  "policies": {
+    "content_rights_required": true,
+    "synthid_watermark_expected": true
+  },
+  "modes_supported": ["text_to_image", "image_edit"]
+}
+```
 
 ## MCP Inspector（動作確認）
 
@@ -48,4 +75,4 @@ npx @modelcontextprotocol/inspector node dist/server.js
 
 ## ライセンス
 
-MIT License（`LICENSE` を参照）。
+[MIT License](LICENSE) を参照してください。
