@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "engines": { "node": ">=18.17" },
-  "bin": { "nanobanana-rules": "dist/server.js" },
+  "bin": { "nanobanana-rules": "dist/cli.js" },
   "files": ["dist", "README.md", "LICENSE"],
   "license": "MIT",
   "dependencies": {
@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

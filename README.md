@@ -26,9 +26,15 @@ npm run build
 npm start
 ```
 
-## Claude Code 連携
+## Quick use（npx で即起動）
 
-エディタやターミナルから Claude Code に MCP サーバーを登録できます。
+```
+npx nanobanana-rules
+# Claude Code での登録（PATH に入っていればそのまま呼べます）
+claude mcp add nanobanana-rules --scope user -- nanobanana-rules
+```
+
+## Claude Code 連携（ローカル実行の指定パスで）
 
 ```
 claude mcp add nanobanana-rules --scope user -- node $PWD/dist/server.js
@@ -65,7 +71,24 @@ get_rules { "lang": "ja", "model": "gemini-2.5-flash-image-preview" }
 ## MCP Inspector（動作確認）
 
 ```
-npx @modelcontextprotocol/inspector node dist/server.js
+npx @modelcontextprotocol/inspector nanobanana-rules
+# またはローカルビルドしたファイルを指定
+# npx @modelcontextprotocol/inspector node dist/server.js
+```
+
+## npm 公開（任意）
+
+```
+npm login
+npm run build
+npm publish --access public
+```
+
+公開後の利用:
+
+```
+npx nanobanana-rules
+claude mcp add nanobanana-rules --scope user -- nanobanana-rules
 ```
 
 ## プロジェクト構成
