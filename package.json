@@ -1,23 +1,25 @@
 {
   "name": "nanobanana-rules",
-  "version": "0.1.0",
+  "version": "0.1.2",
+  "description": "Fetch Gemini Image Generation docs at request-time and return prompt-optimization rules (MCP server).",
   "type": "module",
+  "license": "MIT",
   "engines": { "node": ">=18.17" },
   "bin": { "nanobanana-rules": "dist/cli.js" },
   "files": ["dist", "README.md", "LICENSE"],
-  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm run build"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
     "cheerio": "^1.0.0-rc.12",
     "zod": "^3.25.76"
   },
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "prepare": "npm run build"
-  },
   "devDependencies": {
-    "@types/node": "^24.3.0",
+    "@types/node": "^20.14.0",
     "typescript": "^5.9.2"
   }
 }
