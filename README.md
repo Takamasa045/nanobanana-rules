@@ -1,66 +1,51 @@
 # ナノバナナルール (nanobanana-rules)
 
-Gemini API の画像生成に関するガイドラインを取得できる MCP サーバーです。CLI やエディタから Model Context Protocol (MCP) 経由で呼び出し、最新のドキュメントを参照した要点とテンプレートを JSON で返します。
+Gemini API の画像生成に関するガイドラインをライブ取得して抜粋し、JSON で返す Model Context Protocol (MCP) サーバーです。
+
+## 概要 / 特徴 / 注意
+
+- 特徴: ai.google.dev のドキュメントを都度取得し、要点を抽出してテンプレート付きで返します。
+- 抜粋: SynthID 言及や inlineData 仕様など、実装に重要なキーワードを自動検出します。
+- 出典URL: 返却 JSON にドキュメント URL を含めます。
+- 非公式: Google/ai.google.dev 非公式の補助ツールです。内容の正確性や最新性は保証しません。
 
 ## セットアップ
 
-- 前提: Node.js 18+ / npm
-- 依存関係のインストール:
+- 前提: Node.js 18 以上
+- 依存関係のインストール: `npm i`
+- ビルド: `npm run build`
+- 実行 (stdio): `npm start`
+
+## Claude Code 連携
+
+エディタやターミナルから Claude Code に MCP サーバーを登録できます。
 
 ```
-npm install
+claude mcp add nanobanana-rules --scope user -- node $PWD/dist/server.js
 ```
 
-- TypeScript ビルド:
+## ツール例
 
 ```
-npm run build
+get_rules { "lang": "ja", "model": "gemini-2.5-flash-image-preview" }
 ```
 
-- 実行 (stdio):
+## 免責
+
+- 取得元は ai.google.dev。各種規約・robots.txt を遵守します。
+- 永続キャッシュは行いません（短時間のメモリキャッシュのみ）。
+
+## MCP Inspector（動作確認）
 
 ```
-npm start
+npx @modelcontextprotocol/inspector node dist/server.js
 ```
-
-## MCP ツール
-
-- `get_rules`:
-  - 説明: Gemini API の画像生成に関するルール/ガイドラインを取得
-  - 引数:
-    - `lang` (任意): `ja` や `en` など。既定 `ja`
-    - `model` (任意): 既定 `gemini-2.5-flash-image-preview`
-  - 返り値: JSON を文字列化したテキスト
 
 ## プロジェクト構成
 
 - `src/server.ts`: MCP サーバー本体
-- `dist/`: ビルド成果物 (git 追跡対象外)
-
-## Git 公開の手順
-
-1. このフォルダで Git を初期化
-2. 初回コミットを作成
-3. GitHub/GitLab などで新規リポジトリを作成し、リモートを追加して push
-
-例 (GitHub の場合):
-
-```
-# 初期化と初回コミット
-git init
-git add .
-git commit -m "Initial commit: nanobanana-rules"
-
-# GitHub で空のリポジトリを作成後、その URL を設定
-# 例: https://github.com/<USER>/nanobanana-rules
-
-git remote add origin https://github.com/<USER>/nanobanana-rules.git
-git branch -M main
-git push -u origin main
-```
-
-> 注意: push には GitHub アカウントとトークン設定が必要です。
+- `dist/`: ビルド成果物（git 追跡対象外）
 
 ## ライセンス
 
-未設定。公開ポリシーに応じてライセンスを追加してください（例: MIT/Apache-2.0 等）。
+MIT License（`LICENSE` を参照）。

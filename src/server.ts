@@ -14,11 +14,21 @@ function withLang(pathOrUrl: string, hl = DEFAULT_LANG) {
   return u.toString();
 }
 
+// 短期 TTL キャッシュ（メモリ）
+const CACHE_TTL_MS = 90_000; // 90秒
+const cache: Record<string, { at: number; url: string; html: string }> = {};
+
 async function fetchDoc(lang = DEFAULT_LANG) {
+  const now = Date.now();
+  const key = `doc:${lang}`;
+  if (cache[key] && now - cache[key].at < CACHE_TTL_MS) {
+    return { url: cache[key].url, html: cache[key].html };
+    }
   const url = withLang(DOC_PATH, lang);
   const res = await fetch(url, { headers: { "User-Agent": "MCP-nanobanana-rules/0.1" } });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   const html = await res.text();
+  cache[key] = { at: now, url, html };
   return { url, html };
 }
 
@@ -49,12 +59,29 @@ server.tool(
       .string()
       .optional()
       .describe("モデル名。省略時は gemini-2.5-flash-image-preview"),
+    mode: z
+      .enum(["text_to_image", "image_edit"]).optional()
+      .describe("返すテンプレの最小化。未指定なら包括的に返す。"),
   },
   async (args) => {
     const lang = args.lang ?? DEFAULT_LANG;
     const model = args.model ?? "gemini-2.5-flash-image-preview";
+    const chosenMode = args.mode;
 
-    const { url, html } = await fetchDoc(lang);
+    let url: string;
+    let html: string;
+    try {
+      ({ url, html } = await fetchDoc(lang));
+    } catch (e: any) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Failed to fetch documentation for lang=${lang}. ${e?.message ?? e}`,
+          },
+        ],
+      };
+    }
     const flags = extractCorePoints(html);
 
     const rules = {
@@ -69,12 +96,7 @@ server.tool(
           "安全ポリシー・使用禁止ポリシーの順守が必要。",
         ],
       },
-      modes_supported: [
-        "text_to_image",
-        "image_editing_with_text",
-        "multi_image_to_image",
-        "multi_turn_image_editing",
-      ],
+      modes_supported: ["text_to_image", "image_edit"],
       input_format: {
         model,
         contents_schema: {
@@ -123,29 +145,25 @@ server.tool(
           "対話を重ねて徐々に調整する（マルチターン編集）。",
         ],
       },
-      template: {
-        text_to_image: {
-          model,
-          contents: [
-            "A concise, vivid description of the desired image with key attributes (subject, setting, lighting, style, mood).",
-          ],
-        },
-        image_editing_with_text: {
-          model,
-          contents: [
-            "Describe precise edits to apply to the uploaded image (what-to-change and how).",
-            { inlineData: { mimeType: "image/png", data: "<BASE64_IMAGE>" } },
-          ],
-        },
-        multi_image_to_image: {
-          model,
-          contents: [
-            "Compose a new scene blending the structure from image A and the style from image B. Keep faces natural.",
-            { inlineData: { mimeType: "image/jpeg", data: "<BASE64_IMG_A>" } },
-            { inlineData: { mimeType: "image/png", data: "<BASE64_IMG_B>" } },
-          ],
-        },
-      },
+      template: (() => {
+        const full = {
+          text_to_image: {
+            model,
+            contents: [
+              "A concise, vivid description of the desired image with key attributes (subject, setting, lighting, style, mood).",
+            ],
+          },
+          image_edit: {
+            model,
+            contents: [
+              "Describe precise edits to apply to the uploaded image (what-to-change and how).",
+              { inlineData: { mimeType: "image/png", data: "<BASE64_IMAGE>" } },
+            ],
+          },
+        } as const;
+        if (!chosenMode) return full;
+        return { [chosenMode]: (full as any)[chosenMode] };
+      })(),
     };
 
     // SDK 1.x は {type:"json"} ではなく text で返すのが簡単
@@ -164,4 +182,3 @@ server.tool(
 const transport = new StdioServerTransport();
 await server.connect(transport);
 console.error("nanobanana-rules MCP server running on stdio");
-

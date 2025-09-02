@@ -2,6 +2,10 @@
   "name": "nanobanana-rules",
   "version": "0.1.0",
   "type": "module",
+  "engines": { "node": ">=18.17" },
+  "bin": { "nanobanana-rules": "dist/server.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
     "cheerio": "^1.0.0-rc.12",
